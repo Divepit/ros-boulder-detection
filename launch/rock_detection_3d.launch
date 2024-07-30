@@ -1,8 +1,8 @@
 <launch>
-    <node name="feature_extraction" pkg="rock_detection_3d" type="feature_extraction_using_classes.py" output="screen">
+    <node name="feature_extraction" pkg="rock_detection_3d" type="rock_map_class.py" output="screen">
     <rosparam command="load" file="$(find rock_detection_3d)/config/rock_detection_3d.yaml"/>
     </node>
-    <node name="rock_confirmation" pkg="rock_detection_3d" type="rock_confirmer.py" output="screen">
+    <!-- <node name="rock_confirmation" pkg="rock_detection_3d" type="rock_confirmer_class.py" output="screen">
     <rosparam command="load" file="$(find rock_detection_3d)/config/rock_detection_3d.yaml"/>
-    </node>
+    </node> -->
 </launch>
