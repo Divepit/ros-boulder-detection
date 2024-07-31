@@ -2,13 +2,13 @@
 
 ## Scikit-learn
 
-´´´bash
+``` bash
 pip install scikit-learn
-´´´
+```
 
 ## Numpy
 
-´´´bash
+``` bash
 pip install numpy
-´´´
+```
 
