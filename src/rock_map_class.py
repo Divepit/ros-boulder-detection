@@ -14,7 +14,7 @@ class RockMap:
     def __init__(self):
 
         rospy.init_node('rock_detector', anonymous=True)
-        rospy.set_param('/use_sim_time', True)
+        # rospy.set_param('/use_sim_time', True)
 
         rospy.Subscriber("/elevation_mapping/elevation_map_raw", GridMap, self.callback)
         rospy.Subscriber("/confirmed_rock_ids", Int32MultiArray, self.confirmed_rocks_callback)
@@ -94,9 +94,14 @@ class RockMap:
     
     def extract_raw_points(self):
         current_time = rospy.Time.now()
+        # rospy.loginfo(current_time)
+        # rospy.loginfo((self.last_raw_points_sample_time).to_sec())
+        # rospy.loginfo(1/self.raw_points_sample_rate)
         if self.raw_points is None or (current_time - self.last_raw_points_sample_time).to_sec() > 1/self.raw_points_sample_rate:
             mean_elevation = np.nanmean(self.elevation_data)
-            rock_mask = (self.elevation_data > mean_elevation*self.percentage_of_mean_elevation)
+            max_value = np.nanmax(self.elevation_data)
+            sanitized_data = np.nan_to_num(self.elevation_data, nan=max_value, posinf=max_value, neginf=max_value)
+            rock_mask = (sanitized_data > mean_elevation*self.percentage_of_mean_elevation)
 
             y_indices, x_indices = np.where(rock_mask)
             points = []

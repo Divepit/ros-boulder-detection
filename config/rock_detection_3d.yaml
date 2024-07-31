@@ -10,5 +10,5 @@ DBSCAN_eps: 0.2 # Epsilon value for DBSCAN
 DBSCAN_min_samples: 4 # Minimum number of samples for DBSCAN
 
 percentage_of_mean_elevation: 1 # Percentage of the mean elevation to consider a point's z-value as part of a rock
-do_publish_raw_points: False
+do_publish_raw_points: True
 raw_points_sample_rate: 2
