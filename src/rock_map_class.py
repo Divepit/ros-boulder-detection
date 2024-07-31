@@ -23,6 +23,8 @@ class RockMap:
 
         self.all_markers = None
         self.active_rocks = []
+        self.raw_points = []
+        self.last_raw_points_sample_time = rospy.Time.now()
         self.frame_id = None
         self.elevation_layer = None
         self.resolution = 0.0
@@ -40,6 +42,9 @@ class RockMap:
         self.max_points = rospy.get_param(rospy.get_name() + '/maximum_points_to_qualify_as_rock')
         self.percentage_of_mean_elevation = rospy.get_param(rospy.get_name() + '/percentage_of_mean_elevation')
         self.time_until_rock_is_removed = rospy.get_param(rospy.get_name() + '/time_until_rock_is_removed')
+        self.do_publish_raw_points = rospy.get_param(rospy.get_name() + '/do_publish_raw_points')
+        self.raw_points_sample_rate = rospy.get_param(rospy.get_name() + '/raw_points_sample_rate')
+
 
         rospy.spin()
 
@@ -62,10 +67,9 @@ class RockMap:
 
         self.elevation_data = np.array(grid_map_msg.data[self.elevation_layer].data, dtype=np.float32).reshape(data_dim_x, data_dim_y)
         
-
-        # raw_points = self.extract_raw_points()
-        # if len(raw_points) > 0:
-            # self.publish_raw_points(raw_points)
+        if self.do_publish_raw_points:
+            if len(self.raw_points) > 0:
+                self.publish_raw_points(self.raw_points)
 
         self.sample_active_rocks()
 
@@ -89,27 +93,32 @@ class RockMap:
 
     
     def extract_raw_points(self):
-        mean_elevation = np.nanmean(self.elevation_data)
-        max_elevation = np.nanmax(self.elevation_data)
-        rock_mask = (self.elevation_data > mean_elevation*self.percentage_of_mean_elevation)
+        current_time = rospy.Time.now()
+        if self.raw_points is None or (current_time - self.last_raw_points_sample_time).to_sec() > 1/self.raw_points_sample_rate:
+            mean_elevation = np.nanmean(self.elevation_data)
+            rock_mask = (self.elevation_data > mean_elevation*self.percentage_of_mean_elevation)
 
-        y_indices, x_indices = np.where(rock_mask)
-        points = []
+            y_indices, x_indices = np.where(rock_mask)
+            points = []
 
-        for x_index, y_index in zip(x_indices, y_indices):
-            x = -x_index*self.resolution+self.length_x/2+self.position_x
-            y = -y_index*self.resolution+self.length_y/2+self.position_y
+            for x_index, y_index in zip(x_indices, y_indices):
+                x = -x_index*self.resolution+self.length_x/2+self.position_x
+                y = -y_index*self.resolution+self.length_y/2+self.position_y
+                
+                # Convert from grid coordinates to world coordinates using the pose
+                point = PointStamped()
+                point.header.frame_id = self.frame_id
+                point.header.stamp = rospy.Time.now()
+                point.point.x = x
+                point.point.y = y
+                point.point.z = 0  # Adjust the z-coordinate as necessary
+                points.append([point.point.x, point.point.y, point.point.z])
+                self.last_raw_points_sample_time = current_time
             
-            # Convert from grid coordinates to world coordinates using the pose
-            point = PointStamped()
-            point.header.frame_id = self.frame_id
-            point.header.stamp = rospy.Time.now()
-            point.point.x = x
-            point.point.y = y
-            point.point.z = 0  # Adjust the z-coordinate as necessary
-            points.append([point.point.x, point.point.y, point.point.z])
-        
-        return np.array(points)
+            return np.array(points)
+        else:
+            return self.raw_points
+            
 
     def is_within_radius(self, new_rock, radius):
         if self.active_rocks is not None:
@@ -119,9 +128,9 @@ class RockMap:
         return False
 
     def sample_active_rocks(self):
-
-        
         points = self.extract_raw_points()
+        if len(points) == 0:
+            return
         clustering = DBSCAN(eps=self.dbscan_eps, min_samples=self.dbscan_min_samples).fit(points)
         labels = clustering.labels_
         
@@ -136,41 +145,41 @@ class RockMap:
                     new_rock = Rock(new_centroid[0],new_centroid[1],0,self.next_id)
                     self.next_id += 1
                     rock_in_proximity = self.is_within_radius(new_rock, self.same_rock_radius)
-                    rospy.loginfo("Min distance between points: %f", calculate_min_distance(class_points))
-                    rospy.loginfo("Number of points in rock: %d", len(class_points))
+                    # rospy.loginfo("Min distance between points: %f", calculate_min_distance(class_points))
+                    # rospy.loginfo("Number of points in rock: %d", len(class_points))
                     if not rock_in_proximity:
                         self.active_rocks.append(new_rock)
                     else:
                         rock_in_proximity.update_position(new_rock)
         
 
-    # def publish_raw_points(self, points):
-    #     raw_marker_array = MarkerArray()
-    #     current_time = rospy.Time.now()
+    def publish_raw_points(self, points):
+        raw_marker_array = MarkerArray()
+        current_time = rospy.Time.now()
         
-    #     for i, point in enumerate(points):
-    #         marker = Marker()
-    #         marker.header.stamp = current_time
-    #         marker.type = Marker.SPHERE
-    #         marker.header.frame_id = self.frame_id
-    #         marker.scale.x = 0.1
-    #         marker.scale.y = 0.1
-    #         marker.scale.z = 0.1
-    #         marker.color.r = 1.0
-    #         marker.color.g = 0.0
-    #         marker.color.b = 0.0
-    #         marker.color.a = 1.0
-    #         marker.pose.orientation.w = 1.0
-    #         marker.lifetime = rospy.Duration()
+        for i, point in enumerate(points):
+            marker = Marker()
+            marker.header.stamp = current_time
+            marker.type = Marker.SPHERE
+            marker.header.frame_id = self.frame_id
+            marker.scale.x = 0.1
+            marker.scale.y = 0.1
+            marker.scale.z = 0.1
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
+            marker.color.a = 1.0
+            marker.pose.orientation.w = 1.0
+            marker.lifetime = rospy.Duration()
             
-    #         marker.pose.position.x = point[0]
-    #         marker.pose.position.y = point[1]
-    #         marker.pose.position.z = point[2]
-    #         marker.id = i
+            marker.pose.position.x = point[0]
+            marker.pose.position.y = point[1]
+            marker.pose.position.z = point[2]
+            marker.id = i
             
-    #         raw_marker_array.markers.append(marker)
+            raw_marker_array.markers.append(marker)
                 
-    #     self.raw_marker_pub.publish(raw_marker_array)
+        self.raw_marker_pub.publish(raw_marker_array)
 
     def publish_rock_markers(self, rocks):
         if self.all_markers is None:
