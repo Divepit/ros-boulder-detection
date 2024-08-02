@@ -45,7 +45,6 @@ class RockMap:
         self.do_publish_raw_points = rospy.get_param(rospy.get_name() + '/do_publish_raw_points')
         self.raw_points_sample_rate = rospy.get_param(rospy.get_name() + '/raw_points_sample_rate')
 
-
         rospy.spin()
 
 
