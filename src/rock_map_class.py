@@ -93,14 +93,33 @@ class RockMap:
     
     def extract_raw_points(self):
         current_time = rospy.Time.now()
+
+        if current_time < self.last_raw_points_sample_time:
+            rospy.logwarn('Time reset detected. Resetting last_raw_points_sample_time .')
+            self.last_raw_points_sample_time = current_time
+            self.raw_points = []
+
         # rospy.loginfo(current_time)
         # rospy.loginfo((self.last_raw_points_sample_time).to_sec())
         # rospy.loginfo(1/self.raw_points_sample_rate)
-        if self.raw_points is None or (current_time - self.last_raw_points_sample_time).to_sec() > 1/self.raw_points_sample_rate:
-            mean_elevation = np.nanmean(self.elevation_data)
-            max_value = np.nanmax(self.elevation_data)
-            sanitized_data = np.nan_to_num(self.elevation_data, nan=max_value, posinf=max_value, neginf=max_value)
-            rock_mask = (sanitized_data > mean_elevation*self.percentage_of_mean_elevation)
+        # rospy.loginfo((current_time - self.last_raw_points_sample_time).to_sec())
+        if (current_time - self.last_raw_points_sample_time).to_sec() > 1/self.raw_points_sample_rate:
+            min_value = np.nanmin(self.elevation_data)
+            elevation_data = self.elevation_data
+
+            if min_value < 0:
+                elevation_data = self.elevation_data + np.abs(min_value)
+            max_value = np.nanmax(elevation_data)
+            mean_elevation = np.nanmean(elevation_data)
+    
+
+            rospy.loginfo("Mean elevation: %f", mean_elevation)
+            rospy.loginfo("Max elevation: %f", max_value)
+            rospy.loginfo("Min elevation: %f", min_value)
+
+
+            sanitized_data = np.nan_to_num(elevation_data, nan=0, posinf=max_value, neginf=0)
+            rock_mask = (np.abs(sanitized_data) > np.abs(mean_elevation)*self.percentage_of_mean_elevation)
 
             y_indices, x_indices = np.where(rock_mask)
             points = []
@@ -117,12 +136,11 @@ class RockMap:
                 point.point.y = y
                 point.point.z = 0  # Adjust the z-coordinate as necessary
                 points.append([point.point.x, point.point.y, point.point.z])
+                self.raw_points = points
                 self.last_raw_points_sample_time = current_time
             
             return np.array(points)
-        else:
-            return self.raw_points
-            
+        return np.array(self.raw_points)
 
     def is_within_radius(self, new_rock, radius):
         if self.active_rocks is not None:
