@@ -113,9 +113,9 @@ class RockMap:
             mean_elevation = np.nanmean(elevation_data)
     
 
-            rospy.loginfo("Mean elevation: %f", mean_elevation)
-            rospy.loginfo("Max elevation: %f", max_value)
-            rospy.loginfo("Min elevation: %f", min_value)
+            # rospy.loginfo("Mean elevation: %f", mean_elevation)
+            # rospy.loginfo("Max elevation: %f", max_value)
+            # rospy.loginfo("Min elevation: %f", min_value)
 
 
             sanitized_data = np.nan_to_num(elevation_data, nan=0, posinf=max_value, neginf=0)
