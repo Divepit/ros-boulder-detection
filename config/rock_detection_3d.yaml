@@ -1,14 +1,14 @@
 time_until_rock_is_confirmed: 2.5 # Time in seconds of sampling until a rock is confirmed
 time_until_rock_is_removed: 1 # Time in seconds of sampling without detecting the rock again until it is removed from the list
 
-minimum_points_to_qualify_as_rock: 15 # Minimum number of points to qualify as a rock
-maximum_points_to_qualify_as_rock: 300 # Maximum number of points to qualify as a rock
+minimum_points_to_qualify_as_rock: 5 # Minimum number of points to qualify as a rock
+maximum_points_to_qualify_as_rock: 200 # Maximum number of points to qualify as a rock
 
 radius_to_appoint_to_same_rock: 1 # Proximity radius to appoint a newly detected rock to an existing rock within the same radius
 
 DBSCAN_eps: 0.2 # Epsilon value for DBSCAN
 DBSCAN_min_samples: 4 # Minimum number of samples for DBSCAN
 
-percentage_of_mean_elevation: 1.5 # % Percentage of the mean elevation to consider a point's z-value as part of a rock
+percentage_of_mean_elevation: 1 # % Percentage of the mean elevation to consider a point's z-value as part of a rock
 do_publish_raw_points: True
-raw_points_sample_rate: 5
+raw_points_sample_rate: 1
