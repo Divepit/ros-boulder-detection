@@ -1,8 +1,8 @@
 <launch>
-    <node name="rock_detection_3d" pkg="rock_detection_3d" type="rock_map_class.py" output="screen">
+    <node name="rock_detection_3d" pkg="rock_detection_3d" type="elevation_map_obstacle_detection.py" output="screen">
     <rosparam command="load" file="$(find rock_detection_3d)/config/rock_detection_3d.yaml"/>
     </node>
-    <node pkg="rock_segmentation" type="instance_segmentor_class.py" name="instance_segmentation" output="screen">
+    <node pkg="rock_segmentation" type="rock_segmentor.py" name="instance_segmentation" output="screen">
         <rosparam command="load" file="$(find rock_segmentation)/config/instance_segmentation_simple.yaml"/>
     </node>
     <node name="local_to_enu" pkg="local_to_enu" type="local_to_enu_transformer.py" output="screen">

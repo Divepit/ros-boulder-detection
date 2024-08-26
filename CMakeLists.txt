@@ -10,6 +10,9 @@ project(rock_detection_3d)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  rock_detection_msgs
+
+  # message_generation
 )
 
 # # System dependencies are found with CMake's conventions
@@ -51,11 +54,11 @@ find_package(catkin REQUIRED COMPONENTS
 # Message2.msg
 # )
 
-# # Generate services in the 'srv' folder
+# Generate services in the 'srv' folder
 # add_service_files(
 # FILES
-# Service1.srv
-# Service2.srv
+# SetObstacleType.srv
+# SetObstacleLatLon.srv
 # )
 
 # # Generate actions in the 'action' folder
@@ -104,7 +107,7 @@ catkin_package(
 
   # INCLUDE_DIRS include
   # LIBRARIES rock_detection_3d
-  CATKIN_DEPENDS rospy std_msgs sensor_msgs
+  CATKIN_DEPENDS rospy std_msgs sensor_msgs rock_detection_msgs
 
   # DEPENDS system_lib
 )

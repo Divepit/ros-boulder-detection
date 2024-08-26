@@ -1,14 +1,14 @@
-time_until_rock_is_confirmed: 2.5 # Time in seconds of sampling until a rock is confirmed
-time_until_rock_is_removed: 1 # Time in seconds of sampling without detecting the rock again until it is removed from the list
+time_until_obstacle_is_confirmed: 2.5 # Time in seconds of sampling until an obstacle is confirmed
+time_until_obstacle_is_removed: 1 # Time in seconds of sampling without detecting the obstacle again until it is removed from the list
 
-minimum_points_to_qualify_as_rock: 5 # Minimum number of points to qualify as a rock
-maximum_points_to_qualify_as_rock: 200 # Maximum number of points to qualify as a rock
+minimum_points_to_qualify_as_obstacle: 15 # Minimum number of points to qualify as an obstacle
+maximum_points_to_qualify_as_obstacle: 180 # Maximum number of points to qualify as an obstacle
 
-radius_to_appoint_to_same_rock: 1 # Proximity radius to appoint a newly detected rock to an existing rock within the same radius
+radius_to_appoint_to_same_obstacle: 1 # Proximity radius to appoint a newly detected obstacle to an existing obstacle within the same radius
 
 DBSCAN_eps: 0.2 # Epsilon value for DBSCAN
 DBSCAN_min_samples: 4 # Minimum number of samples for DBSCAN
 
-percentage_of_mean_elevation: 1 # % Percentage of the mean elevation to consider a point's z-value as part of a rock
+percentage_of_mean_elevation: 1.25 # % Percentage of the mean elevation to consider a point's z-value as part of an obstacle
 do_publish_raw_points: True
 raw_points_sample_rate: 1
