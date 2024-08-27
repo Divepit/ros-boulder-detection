@@ -1,0 +1,13 @@
+<launch>
+    <node name="rock_detection_3d" pkg="rock_detection_3d" type="elevation_map_obstacle_detection.py" output="screen">
+    <rosparam command="load" file="$(find rock_detection_3d)/config/rock_detection_3d.yaml"/>
+    </node>
+    <!-- <node pkg="rock_segmentation" type="rock_segmentor.py" name="instance_segmentation" output="screen">
+        <rosparam command="load" file="$(find rock_segmentation)/config/instance_segmentation_simple.yaml"/>
+    </node> -->
+    <node name="local_to_enu" pkg="local_to_enu" type="local_to_enu_transformer.py" output="screen">
+    <rosparam command="load" file="$(find local_to_enu)/config/local_to_enu_transformer.yaml"/>
+    </node>
+    <node name="global_viewer" pkg="global_viewer" type="rqt_global_viewer.py" output="screen">
+    </node>
+</launch>
